@@ -4,12 +4,25 @@ var canvas;
 var gl;
 var program;
 
+
 var projectionMatrix;
 var modelViewMatrix;
 
 var instanceMatrix;
 
 var modelViewMatrixLoc;
+
+var button =  false;
+var angle_3 = 0;
+
+var ee_x;
+var ee_y;
+
+var point_x;
+var point_y;
+
+var ang;
+var temp_x, temp_y ; 
 
 var vertices = [
 
@@ -30,18 +43,20 @@ var joint3Id = 3;
 
 var baseHeight = 1.0;
 var baseWidth = 3.0;
-var joint1Height = 3.0;
-var joint1Width = 0.5;
-var joint2Height  = 3.0;
-var joint2Width  = 0.5;
-var joint3Height  = 3.0;
-var joint3Width  = 0.5;
+var joint1Height = 4.5;
+var joint1Width = 0.25;
+var joint2Height  = 4.5;
+var joint2Width  = 0.25;
+var joint3Height  = 4.5;
+var joint3Width  = 0.25;
+
+var square = 1;
 
 var numNodes = 4;
 var numAngles = 4;
 var angle = 0;
 
-var theta = [0, 0, 0, 0 ];
+var theta = [0, 0, 0, 0, 0];
 
 var numVertices = 24;
 
@@ -109,7 +124,7 @@ function initNodes(Id)
     case joint3Id:
 
     m = translate(0.0,joint2Height, 0.0);
-	m = mult(m, rotate(theta[joint3Id], 1, 0, 0));
+	m = mult(m, rotate(theta[joint3Id], 0, 0, 1));
     figure[joint3Id] = createNode( m, joint3, null, null );
     break; 
 
@@ -160,6 +175,19 @@ function joint3()
 	instanceMatrix = mult(instanceMatrix, scale4(joint3Width, joint3Height, joint3Width) );
     gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(instanceMatrix));
     for(var i =0; i<6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4*i, 4);
+    ee_x = instanceMatrix [0][3];
+    ee_y = instanceMatrix [1][3];
+}
+function point() 
+{
+
+    instanceMatrix = mult(modelViewMatrix, translate(-3.0, 0.5 * square, 0.0) );
+    instanceMatrix = mult(instanceMatrix, scale4(square, square, square) );
+    instanceMatrix = mult(instanceMatrix, rotate(theta[4], 1, 0, 0 ) );
+    gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(instanceMatrix));
+    for(var i =0; i<6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4*i, 4);
+    point_x = instanceMatrix [0][3];
+    point_y = instanceMatrix [1][3];
 }
 function quad(a, b, c, d) 
 {
@@ -190,7 +218,10 @@ window.onload = function init()
     if ( !gl ) { alert( "WebGL isn't available" ); }
 
     gl.viewport( 0, 0, canvas.width, canvas.height );
-    gl.clearColor( 1.0, 1.0, 1.0, 1.0 );
+    gl.clearColor(0.0, 0.0, 0.0, 0.0);
+
+
+
 
     //
     //  Load shaders and initialize attribute buffers
@@ -223,6 +254,10 @@ window.onload = function init()
     gl.enableVertexAttribArray( vPosition );
     for(i=0; i<numNodes; i++) initNodes(i);
 
+    document.getElementById("Button1").onclick = function()
+    {  button =  !button; };
+
+
     render();
 }
 
@@ -231,6 +266,20 @@ var render = function()
 {
 
         gl.clear( gl.COLOR_BUFFER_BIT );
+        temp_x = point_x - ee_x ;
+        temp_y = point_y - ee_y ;
+        ang = Math.atan2(temp_y, temp_x)* 180 / Math.PI;;
+        if (button)
+        {
+            if (theta[3] > ang)
+                angle_3++;
+            theta[3] = angle_3;
+        
+        }
+        for(i=0; i<numNodes; i++) initNodes(i);
         traverse(baseId);
+        point();
         requestAnimFrame(render);
+
+        
 }
