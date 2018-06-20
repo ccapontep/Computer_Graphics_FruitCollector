@@ -12,8 +12,10 @@ var instanceMatrix;
 
 var modelViewMatrixLoc;
 
-var button =  false;
+var button =  false; // for animating the robot
+var grabber = false; // for animating the grabber
 var angle_3 = 0;
+var angle_grabber = 0;
 
 var ee_x;
 var ee_y;
@@ -40,6 +42,9 @@ var baseId = 0;
 var joint1Id  = 1;
 var joint2Id = 2;
 var joint3Id = 3;
+var gb_Id = 4; // grabber_base_Id
+var gla_Id = 5; // grabber_left_arm_Id
+var gra_Id = 6; // grabber_right_arm_Id
 
 var baseHeight = 1.0;
 var baseWidth = 3.0;
@@ -49,14 +54,19 @@ var joint2Height  = 4.5;
 var joint2Width  = 0.25;
 var joint3Height  = 4.5;
 var joint3Width  = 0.25;
+var gb_Height = 0.25;
+var gb_Width = 1.25;
+var ga_Height = 1.25; // grabber_arm_height
+var ga_Width = 0.05; // grabber_arm_width
+
 
 var square = 1;
 
-var numNodes = 4;
+var numNodes = 7;
 var numAngles = 4;
 var angle = 0;
 
-var theta = [0, 0, 0, 0, 0];
+var theta = [0, 0, 0, 0, 0, 0, 0];
 
 var numVertices = 24;
 
@@ -82,6 +92,25 @@ function scale4(a, b, c) {
 }
 
 //--------------------------------------------
+
+function quad(a, b, c, d) 
+{
+     pointsArray.push(vertices[a]);
+     pointsArray.push(vertices[b]);
+     pointsArray.push(vertices[c]);
+     pointsArray.push(vertices[d]);
+}
+
+
+function cube()
+{
+    quad( 1, 0, 3, 2 );
+    quad( 2, 3, 7, 6 );
+    quad( 3, 0, 4, 7 );
+    quad( 6, 5, 1, 2 );
+    quad( 4, 5, 6, 7 );
+    quad( 5, 4, 0, 1 );
+}
 
 
 function createNode(transform, render, sibling, child){
@@ -125,7 +154,28 @@ function initNodes(Id)
 
     m = translate(0.0,joint2Height, 0.0);
 	m = mult(m, rotate(theta[joint3Id], 0, 0, 1));
-    figure[joint3Id] = createNode( m, joint3, null, null );
+    figure[joint3Id] = createNode( m, joint3, null, gb_Id );
+    break; 
+    
+    case gb_Id:
+
+    m = translate(0.0,joint3Height, 0.0);
+	m = mult(m, rotate(theta[gb_Id], 0, 0, 1));
+    figure[gb_Id] = createNode( m, grabberBase, null, gla_Id );
+    break;
+
+    case gla_Id:
+
+    m = translate(-gb_Width/2,gb_Height, 0.0);
+	m = mult(m, rotate(theta[gla_Id], 0, 0, 1));
+    figure[gla_Id] = createNode( m, grabberLeftArm, gra_Id, null );
+    break;
+
+    case gra_Id:
+
+    m = translate(gb_Width/2,gb_Height, 0.0);
+	m = mult(m, rotate(theta[gra_Id], 0, 0, 1));
+    figure[gra_Id] = createNode( m, grabberRightArm, null, null );
     break; 
 
 }}
@@ -189,25 +239,30 @@ function point()
     point_x = instanceMatrix [0][3];
     point_y = instanceMatrix [1][3];
 }
-function quad(a, b, c, d) 
+function grabberBase() 
 {
-     pointsArray.push(vertices[a]);
-     pointsArray.push(vertices[b]);
-     pointsArray.push(vertices[c]);
-     pointsArray.push(vertices[d]);
+
+    instanceMatrix = mult(modelViewMatrix, translate(0.0, 0.5 * gb_Height, 0.0) );
+	instanceMatrix = mult(instanceMatrix, scale4(gb_Width, gb_Height, gb_Width) );
+    gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(instanceMatrix));
+    for(var i =0; i<6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4*i, 4);
 }
-
-
-function cube()
+function grabberLeftArm() 
 {
-    quad( 1, 0, 3, 2 );
-    quad( 2, 3, 7, 6 );
-    quad( 3, 0, 4, 7 );
-    quad( 6, 5, 1, 2 );
-    quad( 4, 5, 6, 7 );
-    quad( 5, 4, 0, 1 );
-}
 
+    instanceMatrix = mult(modelViewMatrix, translate(0.0, 0.5 * ga_Height, 0.0) );
+	instanceMatrix = mult(instanceMatrix, scale4(ga_Width, ga_Height, ga_Width) );
+    gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(instanceMatrix));
+    for(var i =0; i<6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4*i, 4);
+}
+function grabberRightArm() 
+{
+
+    instanceMatrix = mult(modelViewMatrix, translate(0.0, 0.5 * ga_Height, 0.0) );
+	instanceMatrix = mult(instanceMatrix, scale4(ga_Width, ga_Height, ga_Width) );
+    gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(instanceMatrix));
+    for(var i =0; i<6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4*i, 4);
+}
 
 window.onload = function init() 
 {
@@ -256,6 +311,8 @@ window.onload = function init()
 
     document.getElementById("Button1").onclick = function()
     {  button =  !button; };
+    document.getElementById("Button2").onclick = function()
+    {  grabber = !grabber; };
 
 
     render();
@@ -276,6 +333,14 @@ var render = function()
             theta[3] = angle_3;
         
         }
+        if (grabber)
+        {
+        	if (theta[gra_Id] < 45 )
+        		angle_grabber++;
+        	theta[gla_Id] =  -angle_grabber;
+        	theta[gra_Id] =  angle_grabber;
+        }
+
         for(i=0; i<numNodes; i++) initNodes(i);
         traverse(baseId);
         point();
