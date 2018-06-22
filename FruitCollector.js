@@ -14,6 +14,7 @@ var modelViewMatrixLoc;
 
 var button =  false; // for animating the robot
 var grabber = false; // for animating the grabber
+var view_3D = true; // 3D
 var angle_3 = 0;
 var angle_grabber = 0;
 
@@ -25,6 +26,17 @@ var point_y;
 
 var ang;
 var temp_x, temp_y ; 
+
+// Fruits
+var va = vec4(0.0, 0.0, -1.0,1);
+var vb = vec4(0.0, 0.942809, 0.333333, 1);
+var vc = vec4(-0.816497, -0.471405, 0.333333, 1);
+var vd = vec4(0.816497, -0.471405, 0.333333,1);
+var numTimesToSubdivide = 3;
+var normalsArray = [];
+var index = 0;
+var geometry = new THREE.SphereGeometry(0.5,100,100);
+
 
 var vertices = [
 
@@ -122,6 +134,55 @@ function createNode(transform, render, sibling, child){
     }
     return node;
 }
+function triangle(a, b, c) {
+
+     var t1 = subtract(b, a);
+     var t2 = subtract(c, a);
+     var normal = normalize(cross(t2, t1));
+     normal = vec4(normal);
+     normal[3]  = 0.0;
+
+     normalsArray.push(normal);
+     normalsArray.push(normal);
+     normalsArray.push(normal);
+
+
+     pointsArray.push(a);
+     pointsArray.push(b);
+     pointsArray.push(c);
+
+     index += 3;
+}
+
+
+function divideTriangle(a, b, c, count) {
+    if ( count > 0 ) {
+
+        var ab = mix( a, b, 0.5);
+        var ac = mix( a, c, 0.5);
+        var bc = mix( b, c, 0.5);
+
+        ab = normalize(ab, true);
+        ac = normalize(ac, true);
+        bc = normalize(bc, true);
+
+        divideTriangle( a, ab, ac, count - 1 );
+        divideTriangle( ab, b, bc, count - 1 );
+        divideTriangle( bc, c, ac, count - 1 );
+        divideTriangle( ab, bc, ac, count - 1 );
+    }
+    else {
+        triangle( a, b, c );
+    }
+}
+
+
+function tetrahedron(a, b, c, d, n) {
+    divideTriangle(a, b, c, n);
+    divideTriangle(d, c, b, n);
+    divideTriangle(a, d, b, n);
+    divideTriangle(a, c, d, n);
+}
 
 function initNodes(Id) 
 {
@@ -153,7 +214,7 @@ function initNodes(Id)
     case joint3Id:
 
     m = translate(0.0,joint2Height, 0.0);
-	m = mult(m, rotate(theta[joint3Id], 0, 0, 1));
+	m = mult(m, rotate(theta[joint3Id], 1, 0, 1));
     figure[joint3Id] = createNode( m, joint3, null, gb_Id );
     break; 
     
@@ -232,10 +293,10 @@ function point()
 {
 
     instanceMatrix = mult(modelViewMatrix, translate(-3.0, 0.5 * square, 0.0) );
-    instanceMatrix = mult(instanceMatrix, scale4(square, square, square) );
+    //instanceMatrix = mult(instanceMatrix, scale4(square, square, square) );
     instanceMatrix = mult(instanceMatrix, rotate(theta[4], 1, 0, 0 ) );
     gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(instanceMatrix));
-    for(var i =0; i<6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4*i, 4);
+    for(var i =0; i<index; i+=3) gl.drawArrays(gl.TRIANGLES, i, 3);
     point_x = instanceMatrix [0][3];
     point_y = instanceMatrix [1][3];
 }
@@ -275,9 +336,6 @@ window.onload = function init()
     gl.viewport( 0, 0, canvas.width, canvas.height );
     gl.clearColor(0.0, 0.0, 0.0, 0.0);
 
-
-
-
     //
     //  Load shaders and initialize attribute buffers
     //
@@ -286,24 +344,24 @@ window.onload = function init()
     gl.useProgram( program);
 
     instanceMatrix = mat4();
-
     projectionMatrix = ortho(-10.0,10.0,-10.0, 10.0,-10.0,10.0);
     modelViewMatrix = mat4();
-
 
     gl.uniformMatrix4fv(gl.getUniformLocation( program, "modelViewMatrix"), false, flatten(modelViewMatrix) );
     gl.uniformMatrix4fv( gl.getUniformLocation( program, "projectionMatrix"), false, flatten(projectionMatrix) );
 
     modelViewMatrixLoc = gl.getUniformLocation(program, "modelViewMatrix");
-
-
     cube();
+    tetrahedron(va, vb, vc, vd, numTimesToSubdivide);
+
+    var nBuffer = gl.createBuffer();
+    gl.bindBuffer( gl.ARRAY_BUFFER, nBuffer);
+    gl.bufferData( gl.ARRAY_BUFFER, flatten(normalsArray), gl.STATIC_DRAW );
 
     vBuffer = gl.createBuffer();
-
     gl.bindBuffer( gl.ARRAY_BUFFER, vBuffer );
     gl.bufferData(gl.ARRAY_BUFFER, flatten(pointsArray), gl.STATIC_DRAW);
-
+    
     var vPosition = gl.getAttribLocation( program, "vPosition" );
     gl.vertexAttribPointer( vPosition, 4, gl.FLOAT, false, 0, 0 );
     gl.enableVertexAttribArray( vPosition );
@@ -313,38 +371,53 @@ window.onload = function init()
     {  button =  !button; };
     document.getElementById("Button2").onclick = function()
     {  grabber = !grabber; };
+    document.getElementById("button3D").onclick = function(){view_3D = !view_3D;};
 
 
     render();
 }
-
-
 var render = function() 
 {
-
-        gl.clear( gl.COLOR_BUFFER_BIT );
-        temp_x = point_x - ee_x ;
-        temp_y = point_y - ee_y ;
-        ang = Math.atan2(temp_y, temp_x)* 180 / Math.PI;;
-        if (button)
-        {
-            if (theta[3] > ang)
-                angle_3++;
-            theta[3] = angle_3;
+    gl.clear( gl.COLOR_BUFFER_BIT );
+            // projection matrix for 2D and 3D
+    projectionMatrix = ortho(-10.0,10.0,-20.0, 20.0,0.0,50.0);
         
-        }
-        if (grabber)
-        {
-        	if (theta[gra_Id] < 45 )
-        		angle_grabber++;
-        	theta[gla_Id] =  -angle_grabber;
-        	theta[gra_Id] =  angle_grabber;
-        }
+            // model view for 2D
+    modelViewMatrix = mat4();
 
-        for(i=0; i<numNodes; i++) initNodes(i);
-        traverse(baseId);
-        point();
-        requestAnimFrame(render);
-
+            // model view for 3D
+    if (view_3D)
+    {
+        var eye = vec3(10.0, -10.0, 30.0);
+        const at = vec3(0.0, 1.0, -1.0);
+        const up = vec3(0.0, 5.0, 0.0);
+        modelViewMatrix = lookAt(eye, at, up);      
+    }
+    
+    // To send ModelView info vertex and fragment shaders
+    gl.uniformMatrix4fv(gl.getUniformLocation(program, "modelViewMatrix"), false, flatten(modelViewMatrix));
+    gl.uniformMatrix4fv(gl.getUniformLocation(program, "projectionMatrix"), false, flatten(projectionMatrix));
+    modelViewMatrixLoc = gl.getUniformLocation(program, "modelViewMatrix");
+    temp_x = point_x - ee_x ;
+    temp_y = point_y - ee_y ;
+    ang = Math.atan2(temp_y, temp_x)* 180 / Math.PI;;
+    if (button)
+    {
+        if (theta[3] > ang)
+            angle_3++;
+        theta[3] = angle_3;
         
+    }
+    if (grabber)
+    {
+        if (theta[gra_Id] < 45 )
+        	angle_grabber++;
+        theta[gla_Id] =  -angle_grabber;
+        theta[gra_Id] =  angle_grabber;
+    }
+
+    for(i=0; i<numNodes; i++) initNodes(i);
+    traverse(baseId);
+    point();
+    requestAnimFrame(render);       
 }
