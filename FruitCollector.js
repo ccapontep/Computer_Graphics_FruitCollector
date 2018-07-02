@@ -4,7 +4,6 @@ var canvas;
 var gl;
 var program;
 
-
 var projectionMatrix;
 var modelViewMatrix;
 
@@ -26,17 +25,6 @@ var point_y;
 
 var ang;
 var temp_x, temp_y ; 
-
-// Fruits
-var va = vec4(0.0, 0.0, -1.0,1);
-var vb = vec4(0.0, 0.942809, 0.333333, 1);
-var vc = vec4(-0.816497, -0.471405, 0.333333, 1);
-var vd = vec4(0.816497, -0.471405, 0.333333,1);
-var numTimesToSubdivide = 3;
-var normalsArray = [];
-var index = 0;
-var geometry = new THREE.SphereGeometry(0.5,100,100);
-
 
 var vertices = [
 
@@ -70,7 +58,6 @@ var gb_Height = 0.25;
 var gb_Width = 1.25;
 var ga_Height = 1.25; // grabber_arm_height
 var ga_Width = 0.05; // grabber_arm_width
-
 
 var square = 1;
 
@@ -113,9 +100,7 @@ function quad(a, b, c, d)
      pointsArray.push(vertices[d]);
 }
 
-
-function cube()
-{
+function cube(){
     quad( 1, 0, 3, 2 );
     quad( 2, 3, 7, 6 );
     quad( 3, 0, 4, 7 );
@@ -123,7 +108,6 @@ function cube()
     quad( 4, 5, 6, 7 );
     quad( 5, 4, 0, 1 );
 }
-
 
 function createNode(transform, render, sibling, child){
     var node = {
@@ -133,55 +117,6 @@ function createNode(transform, render, sibling, child){
     child: child,
     }
     return node;
-}
-function triangle(a, b, c) {
-
-     var t1 = subtract(b, a);
-     var t2 = subtract(c, a);
-     var normal = normalize(cross(t2, t1));
-     normal = vec4(normal);
-     normal[3]  = 0.0;
-
-     normalsArray.push(normal);
-     normalsArray.push(normal);
-     normalsArray.push(normal);
-
-
-     pointsArray.push(a);
-     pointsArray.push(b);
-     pointsArray.push(c);
-
-     index += 3;
-}
-
-
-function divideTriangle(a, b, c, count) {
-    if ( count > 0 ) {
-
-        var ab = mix( a, b, 0.5);
-        var ac = mix( a, c, 0.5);
-        var bc = mix( b, c, 0.5);
-
-        ab = normalize(ab, true);
-        ac = normalize(ac, true);
-        bc = normalize(bc, true);
-
-        divideTriangle( a, ab, ac, count - 1 );
-        divideTriangle( ab, b, bc, count - 1 );
-        divideTriangle( bc, c, ac, count - 1 );
-        divideTriangle( ab, bc, ac, count - 1 );
-    }
-    else {
-        triangle( a, b, c );
-    }
-}
-
-
-function tetrahedron(a, b, c, d, n) {
-    divideTriangle(a, b, c, n);
-    divideTriangle(d, c, b, n);
-    divideTriangle(a, d, b, n);
-    divideTriangle(a, c, d, n);
 }
 
 function initNodes(Id) 
@@ -279,6 +214,7 @@ function joint2()
     gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(instanceMatrix));
     for(var i =0; i<6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4*i, 4);
 }
+
 function joint3() 
 {
 
@@ -289,17 +225,7 @@ function joint3()
     ee_x = instanceMatrix [0][3];
     ee_y = instanceMatrix [1][3];
 }
-function point() 
-{
 
-    instanceMatrix = mult(modelViewMatrix, translate(-3.0, 0.5 * square, 0.0) );
-    //instanceMatrix = mult(instanceMatrix, scale4(square, square, square) );
-    instanceMatrix = mult(instanceMatrix, rotate(theta[4], 1, 0, 0 ) );
-    gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(instanceMatrix));
-    for(var i =0; i<index; i+=3) gl.drawArrays(gl.TRIANGLES, i, 3);
-    point_x = instanceMatrix [0][3];
-    point_y = instanceMatrix [1][3];
-}
 function grabberBase() 
 {
 
@@ -308,6 +234,7 @@ function grabberBase()
     gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(instanceMatrix));
     for(var i =0; i<6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4*i, 4);
 }
+
 function grabberLeftArm() 
 {
 
@@ -316,6 +243,7 @@ function grabberLeftArm()
     gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(instanceMatrix));
     for(var i =0; i<6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4*i, 4);
 }
+
 function grabberRightArm() 
 {
 
@@ -328,7 +256,7 @@ function grabberRightArm()
 window.onload = function init() 
 {
 
-    canvas = document.getElementById( "gl-canvas" );
+    canvas = document.getElementById( "myCanvas" );
 
     gl = WebGLUtils.setupWebGL( canvas );
     if ( !gl ) { alert( "WebGL isn't available" ); }
@@ -349,14 +277,9 @@ window.onload = function init()
 
     gl.uniformMatrix4fv(gl.getUniformLocation( program, "modelViewMatrix"), false, flatten(modelViewMatrix) );
     gl.uniformMatrix4fv( gl.getUniformLocation( program, "projectionMatrix"), false, flatten(projectionMatrix) );
-
     modelViewMatrixLoc = gl.getUniformLocation(program, "modelViewMatrix");
-    cube();
-    tetrahedron(va, vb, vc, vd, numTimesToSubdivide);
 
-    var nBuffer = gl.createBuffer();
-    gl.bindBuffer( gl.ARRAY_BUFFER, nBuffer);
-    gl.bufferData( gl.ARRAY_BUFFER, flatten(normalsArray), gl.STATIC_DRAW );
+    cube();
 
     vBuffer = gl.createBuffer();
     gl.bindBuffer( gl.ARRAY_BUFFER, vBuffer );
@@ -367,15 +290,17 @@ window.onload = function init()
     gl.enableVertexAttribArray( vPosition );
     for(i=0; i<numNodes; i++) initNodes(i);
 
+    
+
     document.getElementById("Button1").onclick = function()
     {  button =  !button; };
     document.getElementById("Button2").onclick = function()
     {  grabber = !grabber; };
     document.getElementById("button3D").onclick = function(){view_3D = !view_3D;};
 
-
     render();
 }
+
 var render = function() 
 {
     gl.clear( gl.COLOR_BUFFER_BIT );
@@ -418,6 +343,6 @@ var render = function()
 
     for(i=0; i<numNodes; i++) initNodes(i);
     traverse(baseId);
-    point();
-    requestAnimFrame(render);       
+    requestAnimFrame(render); 
+    renderer.render( scene, camera );     
 }
