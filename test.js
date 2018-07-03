@@ -31,34 +31,34 @@ var base_material = new THREE.MeshBasicMaterial({ color: 0xFF8C00 });
 var robot_base = new THREE.Mesh(base_geometry,base_material);
 robot_base.position.z = -1000;
 robot_base.position.y = -300;
-robot_base.position.x = 140;
-
-console.log("BASE POSITION:");
-console.log(robot_base.position);
+robot_base.position.x = 20;
 
 //JOINT-1
 var joint_1_geometry = new THREE.CylinderGeometry(20,20,300);
 var joint_1_material = new THREE.MeshBasicMaterial({ color: 0xFF8C00 });
 var joint_1 = new THREE.Mesh(joint_1_geometry,joint_1_material);
 joint_1.position.y = robot_base.position.y +robot_base.geometry.parameters.height /2 + joint_1.geometry.parameters.height /2;
-joint_1.position.z = -1000;
+//joint_1.position.y = 100;
 robot_base.add(joint_1);
-scene.add(robot_base);
-console.log(joint_1.position);
-console.log(robot_base.children.name);
 
 //JOINT-2
 var joint_2_geometry = new THREE.CylinderGeometry(20,20,150);
 var joint_2_material = new THREE.MeshBasicMaterial({ color: 0xFF8C00 });
 var joint_2 = new THREE.Mesh(joint_2_geometry,joint_2_material);
-
+//joint_2.position.y = 200;
+joint_1.add(joint_2);
 
 //JOINT-3
 var joint_3_geometry = new THREE.CylinderGeometry(20,20,150);
 var joint_3_material = new THREE.MeshBasicMaterial({ color: 0xFF8C00 });
 var joint_3 = new THREE.Mesh(joint_3_geometry,joint_3_material);
 joint_2.add(joint_3);
-scene.add(joint_3);
+scene.add(robot_base);
+
+console.log(robot_base.position);
+console.log(joint_1.position);
+console.log(joint_2.position);
+console.log(joint_3.position);
 
 //////Animation////////
 var animate = function () {
