@@ -56,8 +56,8 @@ var geometryt = THREE.TreeGeometry.build(tree);
 var trex_1 = new THREE.Mesh( geometryt, new THREE.MeshPhongMaterial({ color: 0x8B4513 })); // set any material
 trex_1.position.set(500, earth.getWorldPosition().y, 0)
 
-var trex_2 = new THREE.Mesh( geometryt, new THREE.MeshPhongMaterial({color: 0x8B4513})); // set any material
-trex_2.position.set(0, earth.getWorldPosition().y, 500)
+//var trex_2 = new THREE.Mesh( geometryt, new THREE.MeshPhongMaterial({color: 0x8B4513})); // set any material
+//trex_2.position.set(0, earth.getWorldPosition().y, 500)
 
 var trex_3 = new THREE.Mesh( geometryt, new THREE.MeshPhongMaterial({color: 0x8B4513})); // set any material
 trex_3.position.set(-500, earth.getWorldPosition().y, 0)
@@ -65,23 +65,33 @@ trex_3.position.set(-500, earth.getWorldPosition().y, 0)
 var trex_4 = new THREE.Mesh( geometryt, new THREE.MeshPhongMaterial({color: 0x8B4513})); // set any material
 trex_4.position.set(0, earth.getWorldPosition().y, -500)
 
-scene.add(trex_1, trex_2, trex_3, trex_4);
+scene.add(trex_1, trex_3, trex_4);
 
 /// LEAF
 var distance_y = [700, 700, 400, 500, 700, 400, 700, 500, 500];
 var distance_z = [-300, 300, -100, 100, -200, 200, 0, 300, -200];
 var leaf_geometry = new THREE.SphereGeometry(100,100,100);
 leaf_geometry.scale(3, 1.5, 1.5)
-var leaf_material = new THREE.MeshBasicMaterial({ color: 0x27AE60 });
-var leaf = new THREE.Mesh( leaf_geometry, leaf_material );
+var leaf_material_1 = new THREE.MeshBasicMaterial({ color: 0x46d246 });
+var leaf_material_2 = new THREE.MeshBasicMaterial({ color: 0x239023 });
+
+var change_leaf = true;
+var leaf_1 = new THREE.Mesh( leaf_geometry, leaf_material_1 );
+var leaf_2 = new THREE.Mesh( leaf_geometry, leaf_material_2 );
 var leaf_group = new THREE.Object3D();
-for (var j = 1; j < 5; j++){
+for (var j = 2; j < 5; j++){
 	for ( var i = 0; i < 9; i ++ ) { // create 8 set of leafs
-			var leaf_instance = leaf.clone(); // clone the leaf
+			if (change_leaf) {
+				var leaf_instance = leaf_1.clone(); // clone the leaf
+				change_leaf = !change_leaf;}
+			else {
+				var leaf_instance = leaf_2.clone();
+				change_leaf = !change_leaf;}
+
 			leaf_group.add(leaf_instance);
 			//for (var j = 0; j < 5; j++){
-			if (j==1) trex_1.add(leaf_instance); // add to 1st tree truck
-			else if (j==2) trex_2.add(leaf_instance); // add to 2nd tree truck
+			if (j==2) trex_1.add(leaf_instance); // add to 1st tree truck
+			//else if (j==2) trex_2.add(leaf_instance); // add to 2nd tree truck
 			else if (j==3) trex_3.add(leaf_instance); // add to 3rd tree truck
 			else if (j==4) trex_4.add(leaf_instance); // add to 4th tree truck
 			leaf_instance.position.set(0, distance_y[i] , distance_z[i]);
@@ -103,7 +113,7 @@ basket_texture.repeat.set( 5, 5);
 var basket = new THREE.Mesh(basket_geometry,basket_material);
 basket.position.set(200, earth.getWorldPosition().y, 0);
 scene.add(basket)
-
+///////////// END BASKET //////////////
 
 //CONSTRUCT THE ROBOT//
 //BASE
