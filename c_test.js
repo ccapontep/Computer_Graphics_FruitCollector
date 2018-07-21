@@ -54,13 +54,13 @@ var tree = new THREE.Tree({
 var geometryt = THREE.TreeGeometry.build(tree);
 
 var trex_1 = new THREE.Mesh( geometryt, new THREE.MeshPhongMaterial({ color: 0x8B4513 })); // set any material
-trex_1.position.set(500, earth.getWorldPosition().y, 0)
+trex_1.position.set(500, earth.getWorldPosition().y, -500)
 
 //var trex_2 = new THREE.Mesh( geometryt, new THREE.MeshPhongMaterial({color: 0x8B4513})); // set any material
 //trex_2.position.set(0, earth.getWorldPosition().y, 500)
 
 var trex_3 = new THREE.Mesh( geometryt, new THREE.MeshPhongMaterial({color: 0x8B4513})); // set any material
-trex_3.position.set(-500, earth.getWorldPosition().y, 0)
+trex_3.position.set(-500, earth.getWorldPosition().y, -500)
 
 var trex_4 = new THREE.Mesh( geometryt, new THREE.MeshPhongMaterial({color: 0x8B4513})); // set any material
 trex_4.position.set(0, earth.getWorldPosition().y, -500)
@@ -68,12 +68,15 @@ trex_4.position.set(0, earth.getWorldPosition().y, -500)
 scene.add(trex_1, trex_3, trex_4);
 
 /// LEAF
-var distance_y = [700, 700, 400, 500, 700, 400, 700, 500, 500];
-var distance_z = [-300, 300, -100, 100, -200, 200, 0, 300, -200];
+var distance_y = [700, 400, 700, 500, 700, 400, 700, 500, 500];
+var distance_z = [-300, -100, 300, 100, -200, 200, 0, 300, -200];
+
+var distance_y = [700, 700, 700, 400, 400, 700, 500, 500, 500];
+var distance_z = [-300, 300, -200, 200, -100, 0, 300, -200, 100];
 var leaf_geometry = new THREE.SphereGeometry(100,100,100);
 leaf_geometry.scale(3, 1.5, 1.5)
-var leaf_material_1 = new THREE.MeshBasicMaterial({ color: 0x46d246 });
-var leaf_material_2 = new THREE.MeshBasicMaterial({ color: 0x239023 });
+var leaf_material_1 = new THREE.MeshBasicMaterial({ color: 0x00CC33 });
+var leaf_material_2 = new THREE.MeshBasicMaterial({ color: 0x33CC00  });
 
 var change_leaf = true;
 var leaf_1 = new THREE.Mesh( leaf_geometry, leaf_material_1 );
@@ -97,7 +100,7 @@ for (var j = 2; j < 5; j++){
 			leaf_instance.position.set(0, distance_y[i] , distance_z[i]);
 	}
 }
-scene.add(leaf_group)
+scene.add(leaf_group);
 
 /////////// END OF TREE ///////////////
 
@@ -186,9 +189,9 @@ orange_texture.wrapS = THREE.RepeatWrapping;
 orange_texture.wrapT = THREE.RepeatWrapping;
 orange_texture.repeat.set( 1, 1);
 var orange = new THREE.Mesh(orange_geometry, orange_material);
-orange.position.z = -1000;
-orange.position.x = -300;
-orange.position.y = earth.getWorldPosition().y;
+orange.position.z = -50;
+orange.position.x = -100;
+orange.position.y = 500;
 scene.add(orange);
 //APPLE
 var apple_geometry = new THREE.SphereGeometry(25,25,25);
@@ -255,23 +258,31 @@ var show_circle = function()
 	var material = new THREE.LineBasicMaterial( { color: 0x020202} );
 	var circle = new THREE.Line( geometry, material );
 
-	circle.position.z = -1000;
+	circle.position.z = 0;
 	circle.position.x = j3.x;
 	circle.position.y = j3.y;
 	scene.add( circle );
 
+
 }
 var resultRadian = calculate_angle();
 
-//////Animation////////
+////////// Animation ///////////
 var animate = function () {
-//console.log (resultRadian);
 	if (button2_check)
 		{
 			if (resultRadian != joint_3.rotation.z)
 				{
-					//console.log(joint_3.rotation.z);
-					joint_3.rotation.z = Math.round(joint_3.rotation.z*100) /100 + 0.01;
+
+					//joint_3.rotation.x = Math.round(joint_3.rotation.x*100) /100 - 0.01;
+					joint_3.rotation.x = resultRadian;
+					joint_3.rotation.y = resultRadian;
+					joint_3.rotation.z = -resultRadian;
+
+					console.log(joint_3.getWorldPosition());
+					console.log(grabber_base.getWorldPosition());
+					console.log(orange.getWorldPosition());
+
 				}
 			else
 				show_circle();
