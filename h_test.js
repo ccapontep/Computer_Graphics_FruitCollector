@@ -135,13 +135,12 @@ var joint_2_geometry = new THREE.CylinderGeometry(10,10,150);
 joint_2_geometry.applyMatrix(new THREE.Matrix4().makeTranslation(0,75,0));
 var joint_2_material = new THREE.MeshBasicMaterial({ color: 0x9966cc });
 var joint_2 = new THREE.Mesh(joint_2_geometry,joint_2_material);
-
 joint_1.add(joint_2);
 joint_2.position.y = joint_1.geometry.parameters.height;
 
 //JOINT-3
-var joint_3_geometry = new THREE.CylinderGeometry(10,10,150);
-joint_3_geometry.applyMatrix(new THREE.Matrix4().makeTranslation(0,75,0));
+var joint_3_geometry = new THREE.CylinderGeometry(10,10,250);
+joint_3_geometry.applyMatrix(new THREE.Matrix4().makeTranslation(0,125,0));
 var joint_3_material = new THREE.MeshBasicMaterial({ color: 0xff6666 });
 var joint_3 = new THREE.Mesh(joint_3_geometry,joint_3_material);
 joint_3.position.y = joint_2.geometry.parameters.height;
@@ -151,7 +150,7 @@ joint_2.add(joint_3);
 var grabBase_geometry = new THREE.CubeGeometry(100,10,10);
 var grabBase_material = new THREE.MeshBasicMaterial({ color: 0xFF8C00 });
 var grabber_base = new THREE.Mesh(grabBase_geometry, grabBase_material);
-grabber_base.position.y = 150;
+grabber_base.position.y = joint_3.geometry.parameters.height;
 joint_3.add(grabber_base);
 
 //GRABBER ARMS
@@ -188,7 +187,7 @@ orange_texture.wrapT = THREE.RepeatWrapping;
 orange_texture.repeat.set( 1, 1);
 var orange = new THREE.Mesh(orange_geometry, orange_material);
 orange.position.z = -50;
-orange.position.x = -100;
+orange.position.x = 100;
 orange.position.y = 500;
 scene.add(orange);
 
@@ -303,6 +302,11 @@ var animate = function () {
 			if (orange.position.x > grabber_base.position.x)
 				joint_3.rotation.z = -tmp_ang;
 			else joint_3.rotation.z =  tmp_ang;
+			tmp_ang = Math.atan2((joint_3.geometry.parameters.height), Math.abs(joint_3.position.z - orange.position.z));
+			if (orange.position.z > grabber_base.position.z)
+				joint_3.rotation.x = tmp_ang;
+			else joint_3.rotation.x =  -tmp_ang;
+
 		}
 
 	if (button1_check)
