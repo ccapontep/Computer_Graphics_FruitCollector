@@ -3,7 +3,6 @@ var renderer,
 	camera,
 	light,
 	light2;
-
 var angle_grabber = 0; // grabber_base current angle at the moment
 var button1_check = false;
 var button2_check = false;
@@ -13,27 +12,20 @@ renderer.setClearColor(0x000000, 0);
 renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize( window.innerWidth, window.innerHeight);
 document.body.appendChild( renderer.domElement );
-
 ///SCENE
 scene = new THREE.Scene();
-
 ///CAMERA
 camera = new THREE.PerspectiveCamera( 55, window.innerWidth/window.innerHeight, 0.1, 3000 );
-// add controls of the mouse to rotate the camera about a fixed point
 var controls = new THREE.OrbitControls( camera );
-//controls.update() must be called after any manual changes to the camera's transform
-camera.position.set( 0, 20, 100 ); // set fixed point
-
+camera.position.set( 0, 20, 100 );
+controls.update();
 ///LIGHTS
 light = new THREE.AmbientLight(0xffffff, 0.5);
 scene.add(light);
-
 light2 = new THREE.PointLight(0xffffff, 0.5);
 scene.add(light2);
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////// BACKGROUND /////////////////
-
-// EARTH
 //GIANT - CUBE //
 var earth_geometry = new THREE.CubeGeometry(5000,0,5000);
 var earth_material= new THREE.MeshBasicMaterial({ color: 0xb32d00 });
@@ -118,9 +110,12 @@ basket.position.set(200, earth.getWorldPosition().y, 0);
 scene.add(basket)
 ///////////// END BASKET //////////////
 
+
+
+
 //CONSTRUCT THE ROBOT//
 //BASE
-var base_geometry = new THREE.CylinderGeometry(50,50,50);
+var base_geometry = new THREE.CylinderGeometry(50,50,25);
 var base_material = new THREE.MeshBasicMaterial({ color: 0x31a6ff });
 var robot_base = new THREE.Mesh(base_geometry,base_material);
 robot_base.position.z = 0;
@@ -140,13 +135,12 @@ var joint_2_geometry = new THREE.CylinderGeometry(10,10,150);
 joint_2_geometry.applyMatrix(new THREE.Matrix4().makeTranslation(0,75,0));
 var joint_2_material = new THREE.MeshBasicMaterial({ color: 0x9966cc });
 var joint_2 = new THREE.Mesh(joint_2_geometry,joint_2_material);
-
 joint_1.add(joint_2);
 joint_2.position.y = joint_1.geometry.parameters.height;
 
 //JOINT-3
-var joint_3_geometry = new THREE.CylinderGeometry(10,10,150);
-joint_3_geometry.applyMatrix(new THREE.Matrix4().makeTranslation(0,75,0));
+var joint_3_geometry = new THREE.CylinderGeometry(10,10,250);
+joint_3_geometry.applyMatrix(new THREE.Matrix4().makeTranslation(0,125,0));
 var joint_3_material = new THREE.MeshBasicMaterial({ color: 0xff6666 });
 var joint_3 = new THREE.Mesh(joint_3_geometry,joint_3_material);
 joint_3.position.y = joint_2.geometry.parameters.height;
@@ -156,13 +150,13 @@ joint_2.add(joint_3);
 var grabBase_geometry = new THREE.CubeGeometry(100,10,10);
 var grabBase_material = new THREE.MeshBasicMaterial({ color: 0xFF8C00 });
 var grabber_base = new THREE.Mesh(grabBase_geometry, grabBase_material);
-grabber_base.position.y = 150;
+grabber_base.position.y = joint_3.geometry.parameters.height;
 joint_3.add(grabber_base);
 
 //GRABBER ARMS
 //LEFT_ARM
 var leftArm_geometry = new THREE.CubeGeometry(10,70,10);
-leftArm_geometry.applyMatrix(new THREE.Matrix4().makeTranslation(0,35,0));
+leftArm_geometry.applyMatrix(new THREE.Matrix4().makeTranslation(5,35,5));
 var leftArm_material = new THREE.MeshBasicMaterial({ color: 0xFF8C00 });
 var grabber_leftArm = new THREE.Mesh(leftArm_geometry, leftArm_material);
 grabber_leftArm.position.y = 5;
@@ -179,6 +173,9 @@ grabber_rightArm.position.x = 55;
 //grabber_rightArm.rotation.z = -0.1;
 grabber_base.add(grabber_rightArm);
 scene.add(robot_base);
+/////// END-OF-ROBOT /////////////////////////////////////////////////////////////////////////////////////////////
+
+
 
 //FRUITS//
 //ORANGE
@@ -190,9 +187,10 @@ orange_texture.wrapT = THREE.RepeatWrapping;
 orange_texture.repeat.set( 1, 1);
 var orange = new THREE.Mesh(orange_geometry, orange_material);
 orange.position.z = -50;
-orange.position.x = -100;
+orange.position.x = 100;
 orange.position.y = 500;
 scene.add(orange);
+
 //APPLE
 var apple_geometry = new THREE.SphereGeometry(25,25,25);
 var apple_texture = new THREE.TextureLoader().load("apple.jpg");
@@ -203,18 +201,44 @@ apple_texture.repeat.set( 1, 1);
 var apple = new THREE.Mesh(apple_geometry, apple_material);
 apple.position.z = -1000;
 apple.position.x = 250;
-apple.position.y = earth.getWorldPosition().y + 50;
+apple.position.y = 50;
 scene.add(apple);
-
+/////////// END OF FRUITS /////////////////////////////////////////////////////////
+var canvas = document.getElementById("myCanvas");
+var canvasPosition = renderer.domElement.getBoundingClientRect();
 document.getElementById("button1").onclick = function()
 	{button1_check = !button1_check;};
 document.getElementById("button2").onclick = function()
 	{button2_check = !button2_check;};
+/* ///// MOUSE CLICK ////////////////////////////////////////////// 
+document.addEventListener('click',function(event)
+	{
+	var orange_geometry = new THREE.SphereGeometry(100,100,100);
+	var orange_texture = new THREE.TextureLoader().load("orange.jpg");
+	var orange_material = new THREE.MeshBasicMaterial({ map: orange_texture });
+	orange_texture.wrapS = THREE.RepeatWrapping;
+	orange_texture.wrapT = THREE.RepeatWrapping;
+	orange_texture.repeat.set( 1, 1);
+	var orange_material = new THREE.MeshBasicMaterial({ color: 0xFF8C00 });
+	var orange = new THREE.Mesh(orange_geometry, orange_material);
+	//var mouse_x = ((event.clientX-canvasPosition.left) / window.innerWidth ) * 2 - 1;
+	//var mouse_y = -( (event.clientY-canvasPosition.top) / window.innerHeight ) * 2 + 1;
+	var mouse_x = event.clientX + document.body.scrollLeft +document.documentElement.scrollLeft;
+	mouse_x  -= canvas.offsetLeft;
+	var mouse_y = event.clientY + document.body.scrollTop +document.documentElement.scrollTop;
+	mouse_y -= canvas.offsetTop;
+	var vector = new THREE.Vector3( mouse_x, mouse_y, -1 ).unproject( camera );
+	orange.position.set(mouse_x,mouse_y,-1);
+	console.log(mouse_x,mouse_y);
+	console.log(orange.getWorldPosition());
+	console.log(orange.position.x);
+	scene.add(orange);
+	},false);
+////////// END OF  MOUSE CLICK //////////////////////////////*/
 
+// Function calculates the angle between 3 points, #TODO :: give parameters for later use !!!
 var gp;
 var j3;
-////////////////////////////////////////
-// Function calculates the angle between 3 points, #TODO :: give parameters for later use !!!
 var calculate_angle = function(){
 		gp = grabber_base.getWorldPosition();
 	var op = orange.getWorldPosition();
@@ -246,6 +270,7 @@ var calculate_angle = function(){
 	resultRadian = Math.round(resultRadian*100) / 100;
 	return resultRadian;
 }
+
 ////////// END OF FUNCTION /////////////////
 ///////////////////////////////////////////
 
@@ -263,29 +288,24 @@ var show_circle = function()
 	circle.position.y = j3.y;
 	scene.add( circle );
 
-
 }
-var resultRadian = calculate_angle();
+//var resultRadian = calculate_angle();
 
-////////// Animation ///////////
-var animate = function () {
+//////Animation////////
+var animate = function () {	
+//console.log (resultDegree);
 	if (button2_check)
 		{
-			if (resultRadian != joint_3.rotation.z)
-				{
+			var tmp_ang = Math.atan2(joint_3.geometry.parameters.height,(Math.abs(joint_3.position.x - orange.position.x)));
+			console.log(tmp_ang);
+			if (orange.position.x > grabber_base.position.x)
+				joint_3.rotation.z = -tmp_ang;
+			else joint_3.rotation.z =  tmp_ang;
+			tmp_ang = Math.atan2((joint_3.geometry.parameters.height), Math.abs(joint_3.position.z - orange.position.z));
+			if (orange.position.z > grabber_base.position.z)
+				joint_3.rotation.x = tmp_ang;
+			else joint_3.rotation.x =  -tmp_ang;
 
-					//joint_3.rotation.x = Math.round(joint_3.rotation.x*100) /100 - 0.01;
-					joint_3.rotation.x = resultRadian;
-					joint_3.rotation.y = resultRadian;
-					joint_3.rotation.z = -resultRadian;
-
-					console.log(joint_3.getWorldPosition());
-					console.log(grabber_base.getWorldPosition());
-					console.log(orange.getWorldPosition());
-
-				}
-			else
-				show_circle();
 		}
 
 	if (button1_check)
@@ -294,7 +314,7 @@ var animate = function () {
 			grabber_rightArm.rotation.z += 0.25;
 			grabber_leftArm.rotation.z = -grabber_rightArm.rotation.z;
 		}
-	}
+	}	
 	requestAnimationFrame( animate );
 	controls.update();
 	renderer.render( scene, camera );
