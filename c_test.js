@@ -14,10 +14,11 @@ renderer.setSize( window.innerWidth, window.innerHeight);
 document.body.appendChild( renderer.domElement );
 ///SCENE
 scene = new THREE.Scene();
+scene.background = new THREE.Color( 0x81D4FA );
 ///CAMERA
 camera = new THREE.PerspectiveCamera( 55, window.innerWidth/window.innerHeight, 0.1, 3000 );
 var controls = new THREE.OrbitControls( camera );
-camera.position.set( 0, 20, 100 );
+camera.position.set( 2000, 1200, 1400 );
 controls.update();
 ///LIGHTS
 light = new THREE.AmbientLight(0xffffff, 0.5);
@@ -33,7 +34,7 @@ var earth = new THREE.Mesh(earth_geometry,earth_material);
 scene.add(earth);
 // END-OF-GIANT-CUBE//
 
-//TREEE
+/// TREEE
 var tree = new THREE.Tree({
     generations : 3,        // # for branch' hierarchy
     length      : 200,      // length of root branch
@@ -125,30 +126,27 @@ var w_distance_x = [-30, 30, -30, 30];
 var w_distance_z = [30, 30, -30, -30];
 
 var wheel_geometry = new THREE.SphereGeometry(15, 15, 15);
-var wheel_material = new THREE.MeshStandardMaterial({ color: 0x424242  });
-var wheel = new THREE.Mesh( wheel_geometry, wheel_material );
-var wheel_group = new THREE.Object3D();
-for ( var i = 0; i < 3; i ++ ) { // create 4 set of wheels
-	for (var j=0; j < 5; j++){
-		var wheel_instance = wheel.clone(); // clone the wheel
-		wheel_group.add(wheel_instance);
-		robot_base.add(wheel_instance);
-		wheel_instance.position.set(
-			robot_base.position.x + w_distance_x[j],
+var wheel_texture = new THREE.TextureLoader().load("strips.png");
+var wheel_material = new THREE.MeshBasicMaterial({ map: wheel_texture });
+wheel_texture.wrapS = THREE.RepeatWrapping;
+wheel_texture.wrapT = THREE.RepeatWrapping;
+wheel_texture.repeat.set( 4, 4);
+//var wheel = new THREE.Mesh( wheel_geometry, wheel_material );
+//var wheel_group = new THREE.Object3D();
+for ( var i = 1; i < 5; i ++ )
+{ // create 4 set of wheels
+		//var wheel_name = "wheel_" + i.toString();
+		var wheel = new THREE.Mesh( wheel_geometry, wheel_material );
+		wheel.name = "wheel_" + i.toString();
+
+		scene.add(wheel);
+
+		robot_base.add(wheel);
+		wheel.position.set(
+			robot_base.position.x + w_distance_x[i-1],
 			- robot_base.position.y * 0.5 ,
-			robot_base.position.z + w_distance_z[j]);
-	};
-};
-scene.add(wheel_group);
-
-
-for ( var i = 0; i < 9; i ++ ) { // create 8 set of leafs
-		var leaf_instance = leaf_1.clone(); // clone the leaf
-		leaf_group.add(leaf_instance);
-		trex_1.add(leaf_instance); // add to 1st tree truck
-		leaf_instance.position.set(0, distance_y[i] , distance_z[i]);
+			robot_base.position.z + w_distance_z[i-1]);
 }
-scene.add(leaf_group);
 
 //JOINT-1
 var joint_1_geometry = new THREE.CylinderGeometry(10,10,150);
@@ -240,31 +238,7 @@ document.getElementById("button1").onclick = function()
 		step_1_check = !step_1_check;
 		translation_part = true;
 	};
-/* ///// MOUSE CLICK //////////////////////////////////////////////
-document.addEventListener('click',function(event)
-	{
-	var orange_geometry = new THREE.SphereGeometry(100,100,100);
-	var orange_texture = new THREE.TextureLoader().load("orange.jpg");
-	var orange_material = new THREE.MeshBasicMaterial({ map: orange_texture });
-	orange_texture.wrapS = THREE.RepeatWrapping;
-	orange_texture.wrapT = THREE.RepeatWrapping;
-	orange_texture.repeat.set( 1, 1);
-	var orange_material = new THREE.MeshBasicMaterial({ color: 0xFF8C00 });
-	var orange = new THREE.Mesh(orange_geometry, orange_material);
-	//var mouse_x = ((event.clientX-canvasPosition.left) / window.innerWidth ) * 2 - 1;
-	//var mouse_y = -( (event.clientY-canvasPosition.top) / window.innerHeight ) * 2 + 1;
-	var mouse_x = event.clientX + document.body.scrollLeft +document.documentElement.scrollLeft;
-	mouse_x  -= canvas.offsetLeft;
-	var mouse_y = event.clientY + document.body.scrollTop +document.documentElement.scrollTop;
-	mouse_y -= canvas.offsetTop;
-	var vector = new THREE.Vector3( mouse_x, mouse_y, -1 ).unproject( camera );
-	orange.position.set(mouse_x,mouse_y,-1);
-	console.log(mouse_x,mouse_y);
-	console.log(orange.getWorldPosition());
-	console.log(orange.position.x);
-	scene.add(orange);
-	},false);
-////////// END OF  MOUSE CLICK //////////////////////////////*/
+
 // Function calculates the angle between 3 points, #TODO :: give parameters for later use !!!
 var gp;
 var j3;
@@ -316,8 +290,7 @@ var animate = function ()
 	if (step_1_check)
 
 		{   //////////  TRANSLATION PART /////////////
-			wheel_group.rotation.x += radians(5);
-			wheel_group.rotation.z += radians(5);
+
 			if (translation_part )
 			{
 				if (robot_base.position.x < orange.position.x) robot_base.position.x += 1.0;
@@ -325,6 +298,10 @@ var animate = function ()
 				if (robot_base.position.z < orange.position.z +distance) robot_base.position.z += 1.0;
 				else robot_base.position.z -= 1.0;
 				angx = calculate_angle();
+				scene.getObjectByName("wheel_1").rotation.z += 0.2;
+				scene.getObjectByName("wheel_4").rotation.z += 0.2;
+				scene.getObjectByName("wheel_2").rotation.z += 0.2;
+				scene.getObjectByName("wheel_3").rotation.z += 0.2;
 			}
 				/////////// CHECK TRANSLATION FINISHED /////////////////
 			if ((robot_base.position.x == orange.position.x) && (robot_base.position.z - distance == orange.position.z))
@@ -363,7 +340,10 @@ var animate = function ()
 		if (grabber_base.getWorldPosition().z < basket.position.z)	robot_base.position.z += 1.0;
 		else if (grabber_base.getWorldPosition().z > basket.position.z)robot_base.position.z -= 1.0;
 		else {}
-
+		scene.getObjectByName("wheel_1").rotation.z += 0.2;
+		scene.getObjectByName("wheel_4").rotation.z += 0.2;
+		scene.getObjectByName("wheel_2").rotation.z += 0.2;
+		scene.getObjectByName("wheel_3").rotation.z += 0.2;
 		//console.log(grabber_base.getWorldPosition().z);
 		//console.log(basket.position.z);
 
