@@ -22,28 +22,30 @@ var apple_check = false;
 var translation_part = false;
 
 ///RENDERER
-renderer = new THREE.WebGLRenderer({canvas: myCanvas, alpha: true });
+renderer = new THREE.WebGLRenderer();
 renderer.setClearColor(0x000000, 0);
 renderer.setPixelRatio(window.devicePixelRatio);
-renderer.setSize( window.innerWidth, window.innerHeight);
+renderer.setSize( window.innerWidth - 200, window.innerHeight -40);
 document.body.appendChild( renderer.domElement );
 ///SCENE
 scene = new THREE.Scene();
+scene.background = new THREE.Color( 0x81D4FA );
 ///CAMERA
 camera = new THREE.PerspectiveCamera( 55, window.innerWidth/window.innerHeight, 0.1, 3000 );
 var controls = new THREE.OrbitControls( camera );
 camera.position.set( 2000, 1200, 1400 );
-controls.update();
+//controls.update();
 ///LIGHTS
-light = new THREE.AmbientLight(0xffffff, 0.5);
+light = new THREE.AmbientLight(0xffffff, 0.6);
 scene.add(light);
-light2 = new THREE.PointLight(0xffffff, 0.5);
+light2 = new THREE.PointLight(0xfdb813, 0.5);
+light2.position.set(2000, 5000, 2000);
 scene.add(light2);
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //GIANT - CUBE //
 var earth_geometry = new THREE.CubeGeometry(5000,0,5000);
-var earth_material= new THREE.MeshBasicMaterial({ color: 0xb32d00 });
+var earth_material= new THREE.MeshLambertMaterial({ color: 0xba4a00 });
 var earth = new THREE.Mesh(earth_geometry,earth_material);
 scene.add(earth);
 // END-OF-GIANT-CUBE//
@@ -60,13 +62,13 @@ var tree = new THREE.Tree({
 
 var geometryt = THREE.TreeGeometry.build(tree);
 
-var trex_1 = new THREE.Mesh( geometryt, new THREE.MeshPhongMaterial({ color: 0x8B4513 })); // set any material
+var trex_1 = new THREE.Mesh( geometryt, new THREE.MeshLambertMaterial({ color: 0x8B4513 })); // set any material
 trex_1.position.set(500, earth.getWorldPosition().y, -500)
 
-var trex_3 = new THREE.Mesh( geometryt, new THREE.MeshPhongMaterial({color: 0x8B4513})); // set any material
+var trex_3 = new THREE.Mesh( geometryt, new THREE.MeshLambertMaterial({color: 0x8B4513})); // set any material
 trex_3.position.set(-500, earth.getWorldPosition().y, -500)
 
-var trex_4 = new THREE.Mesh( geometryt, new THREE.MeshPhongMaterial({color: 0x8B4513})); // set any material
+var trex_4 = new THREE.Mesh( geometryt, new THREE.MeshLambertMaterial({color: 0x8B4513})); // set any material
 trex_4.position.set(0, earth.getWorldPosition().y, -500)
 
 scene.add(trex_1, trex_3, trex_4);
@@ -79,8 +81,8 @@ var distance_y = [700, 700, 700, 400, 400, 700, 500, 500, 500];
 var distance_z = [-300, 300, -200, 200, -100, 0, 300, -200, 100];
 var leaf_geometry = new THREE.SphereGeometry(100,100,100);
 leaf_geometry.scale(3, 1.5, 1.5)
-var leaf_material_1 = new THREE.MeshBasicMaterial({ color: 0x00CC33 });
-var leaf_material_2 = new THREE.MeshBasicMaterial({ color: 0x33CC00  });
+var leaf_material_1 = new THREE.MeshLambertMaterial({ color: 0x00CC33 });
+var leaf_material_2 = new THREE.MeshLambertMaterial({ color: 0x00ff66  });
 
 var change_leaf = true;
 var leaf_1 = new THREE.Mesh( leaf_geometry, leaf_material_1 );
@@ -108,7 +110,7 @@ scene.add(leaf_group);
 /////////// END OF TREE ///////////////
 
 /////////// BASKET ///////////////////
-var basket_geometry = new THREE.CylinderGeometry(100,50,50);
+var basket_geometry = new THREE.CylinderGeometry(100,75,50);
 basket_geometry.scale(1, 3, 1)
 basket_geometry.applyMatrix(new THREE.Matrix4().makeTranslation(0,75,0));
 var basket_texture = new THREE.TextureLoader().load("basket_texture.jpg");
@@ -129,6 +131,7 @@ var base_material = new THREE.MeshBasicMaterial({ color: 0x31a6ff });
 var robot_base = new THREE.Mesh(base_geometry,base_material);
 robot_base.position.z = 0;
 robot_base.position.y = earth.getWorldPosition().y + 50;
+
 
 // WHEELS
 var w_distance_x = [-30, 30, -30, 30];
@@ -171,6 +174,8 @@ var joint_2_material = new THREE.MeshBasicMaterial({ color: 0x9966cc });
 var joint_2 = new THREE.Mesh(joint_2_geometry,joint_2_material);
 joint_1.add(joint_2);
 joint_2.position.y = joint_1.geometry.parameters.height;
+joint_2.add(camera);
+camera.position.set(-350,0,1180);
 
 //JOINT-3
 var joint_3_geometry = new THREE.CylinderGeometry(10,10,250);
@@ -180,12 +185,15 @@ var joint_3 = new THREE.Mesh(joint_3_geometry,joint_3_material);
 joint_3.position.y = joint_2.geometry.parameters.height;
 joint_2.add(joint_3);
 
+
+
 //GRABBER_BASE
 var grabBase_geometry = new THREE.CubeGeometry(100,10,10);
 var grabBase_material = new THREE.MeshBasicMaterial({ color: 0xFF8C00 });
 var grabber_base = new THREE.Mesh(grabBase_geometry, grabBase_material);
 grabber_base.position.y = joint_3.geometry.parameters.height;
 joint_3.add(grabber_base);
+
 
 //GRABBER ARMS
 //LEFT_ARM
@@ -318,6 +326,8 @@ document.getElementById("button1").onclick = function()
 		orange_check =  true;
 		step_3_check = false;
 		step_1_check = true;
+		document.getElementById("text4").innerHTML = "You picked ORANGE!";
+		camera.position.set(-350,0,1180);
 		translation_part = true;
 	};
 document.getElementById("button2").onclick = function()
@@ -326,8 +336,12 @@ document.getElementById("button2").onclick = function()
 		apple_check = true;
 		step_3_check = false;
 		step_1_check = true;
+		document.getElementById("text4").innerHTML = "You picked APPLE!";
+		camera.position.set(-350,0,1180);
 		translation_part = true;
 	};
+
+
 
 //////Animation////////
 
@@ -345,6 +359,7 @@ var animate = function ()
 				else robot_base.position.x -= 1.0;
 				if (robot_base.position.z < fruit.position.z + distance) robot_base.position.z += 1.0;
 				else robot_base.position.z -= 1.0;
+				camera.position.y += 6.0;
 				angx = calculate_angle();
 				angx_backup = 0;
 				scene.getObjectByName("wheel_1").rotation.z += 0.2;
@@ -356,12 +371,12 @@ var animate = function ()
 				/////////// CHECK TRANSLATION  IS FINISHED /////////////////
 			if ((robot_base.position.x == fruit.position.x) && (robot_base.position.z - distance == fruit.position.z))
 				{translation_part = false; 
-					console.log ("translation falseeeeee"); 
-				}
+				document.getElementById("text4").innerHTML = "Aligned with FRUIT!";}
 
 				///////////// ROTATION PART ///////////////////////////
 			if (translation_part == false)
 			{
+				
 				if (angx > 0)
 				{
 					joint_3.rotation.x -= radians(1);
@@ -384,7 +399,7 @@ var animate = function ()
 	if (step_2_check)
 
 	{	
-
+		camera.rotation.y += 2.0;
 		if (grabber_rightArm.rotation.z < radians(30))
 			{	
 				grabber_rightArm.rotation.z += 0.25;
@@ -395,21 +410,34 @@ var animate = function ()
 		{
 			grabber_base.add(fruit);
 			fruit.position.set(0, 40, 0);
-			i ++;			
+			i ++;	
+					
 		}
 
 
 
-		if (grabber_base.getWorldPosition().x < basket.position.x)	robot_base.position.x += 1.0;
+
+
+
+		if (grabber_base.getWorldPosition().x < basket.position.x) robot_base.position.x += 1.0;		
 		else if (grabber_base.getWorldPosition().x > basket.position.x) robot_base.position.x -= 1.0;
 		else {}
 
-		if (grabber_base.getWorldPosition().z < basket.position.z)	robot_base.position.z += 1.0;
+		if (grabber_base.getWorldPosition().z < basket.position.z) robot_base.position.z += 1.0;
 		else if (grabber_base.getWorldPosition().z > basket.position.z)robot_base.position.z -= 1.0;
 		else {}	
 
+			scene.getObjectByName("wheel_1").rotation.z += 0.2;
+			scene.getObjectByName("wheel_4").rotation.z += 0.2;
+			scene.getObjectByName("wheel_2").rotation.z += 0.2;
+			scene.getObjectByName("wheel_3").rotation.z += 0.2;
+
+
+		document.getElementById("text4").innerHTML = "Aligning with BASKET!";
+
 		if ((grabber_base.getWorldPosition().x == basket.position.x) && (Math.round(grabber_base.getWorldPosition().z)  == basket.position.z))
-			{
+			{	
+
 				free_fall = true;
 				step_1_check = false;	
 				step_2_check = false;
@@ -421,6 +449,14 @@ var animate = function ()
 
 	if (free_fall)
 	{	
+				camera.position.z -=5.0;
+				////// RE-CONFIGURE GRABBER ///////
+				if (grabber_rightArm.rotation.z != radians(0))
+				{
+					grabber_rightArm.rotation.z -= 0.25;
+					grabber_leftArm.rotation.z = grabber_rightArm.rotation.z;
+				}	
+			///////////// END RECONFIGURE /////////////////
 			if (i == 0)
 			{
 				var fruit_tmp_x = fruit.getWorldPosition().x;
@@ -434,7 +470,9 @@ var animate = function ()
 			if (fruit.getWorldPosition().y >= 0) 
 			{
 				fruit.position.y -= 1.0 ;
-				fruit.rotation.x += 0.1 ;
+				fruit.rotation.x += 0.2 ;
+				document.getElementById("text4").innerHTML = "FRUIT dropped!";		
+
 			}
 
 			else if (fruit.getWorldPosition().y < 0)
@@ -448,39 +486,49 @@ var animate = function ()
 	if (step_3_check)
 	{	
 			//////// RE-CONFIGURES ITSELF ////////////
-
+				camera.position.z +=1.0;
 				if (angx_backup > 0)
 				{	
 					
 					joint_3.rotation.x += radians(1);
 					angx_backup -=1;
+					document.getElementById("text4").innerHTML = "Re-Configuring the ROBOT!";		
+
 				}
 
-			////// RE-CONFIGURE GRABBER ///////
-				if (grabber_rightArm.rotation.z != radians(0))
-				{
-					grabber_rightArm.rotation.z -= 0.25;
-					grabber_leftArm.rotation.z = grabber_rightArm.rotation.z;
-				}	
-			///////////// END RECONFIGURE /////////////////
+
+
+
 			///////////////////////////////////////////////
 
 			////////// TRANSLATE TO 0,0,0 POINT ///////////
 
 			if (robot_base.position.z > 0)
-				robot_base.position.z -= 1.0 ;
-
-			if (robot_base.position.x > 0)
-				robot_base.position.x -= 1.0 ;
-
+			{
+				
+			
 			scene.getObjectByName("wheel_1").rotation.z += 0.2;
 			scene.getObjectByName("wheel_4").rotation.z += 0.2;
 			scene.getObjectByName("wheel_2").rotation.z += 0.2;
 			scene.getObjectByName("wheel_3").rotation.z += 0.2;
+					robot_base.position.z -= 1.0 ;
+			}
 
-			console.log(robot_base.getWorldPosition());
+			if (robot_base.position.x > 0)
+			{
+				robot_base.position.x -= 1.0 ;
 			
+			scene.getObjectByName("wheel_1").rotation.z += 0.2;
+			scene.getObjectByName("wheel_4").rotation.z += 0.2;
+			scene.getObjectByName("wheel_2").rotation.z += 0.2;
+			scene.getObjectByName("wheel_3").rotation.z += 0.2;
+			robot_base.position.z -= 1.0 ;
+			}
+			document.getElementById("text4").innerHTML = "Going back to origin!";
+		
 	}
+
+
 
 	requestAnimationFrame( animate );
 	controls.update();
