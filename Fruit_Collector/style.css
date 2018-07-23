@@ -1,0 +1,88 @@
+	.btn1 {
+			border-radius: 50%;
+	width: 100px;
+	height: 100px; 
+	background: url(orange_icon.png) no-repeat center ;
+	background-size: 100%; /* To fill the dimensions of container (button), or */
+  	background-size: 40px auto;
+	position: absolute;
+	top: 355px;
+	right: 50px;
+		}
+
+	.btn2 {
+			border-radius: 50%;
+	width: 100px;
+	height: 100px; 
+	background: url(apple_icon.png) no-repeat center ;
+	background-size: 100%; /* To fill the dimensions of container (button), or */
+  	background-size: 40px auto;
+	position: absolute;
+	top: 500px;
+	right: 50px;
+		}
+
+		.title1
+		{
+			  
+		font-weight:normal;
+		color:#F27F1B;
+		background-color:#FFFBC2;
+		letter-spacing:1pt;
+		word-spacing:0pt;
+		font-size:26px;
+		text-align:left;
+		font-family:helvetica, sans-serif;
+		line-height:1;
+		position: absolute;
+		top: 25px;
+		right: 5px;
+		}
+		.title2
+		{
+			  
+		font-weight:normal;
+		color:#F27F1B;
+		background-color:#FFFBC2;
+		letter-spacing:1pt;
+		word-spacing:0pt;
+		font-size:20px;
+		text-align:left;
+		font-family:helvetica, sans-serif;
+		line-height:1;
+		position: absolute;
+		top: 250px;
+		right: 20px;
+		}
+		.title3
+		{
+			  
+		font-weight:normal;
+		color:#F27F1B;
+		background-color:#FFFBC2;
+		letter-spacing:1pt;
+		word-spacing:0pt;
+		font-size:15px;
+		text-align:left;
+		font-family:helvetica, sans-serif;
+		line-height:1;
+		position: absolute;
+		top: 300px;
+		right: 40px;
+		}
+		.title4
+		{
+			  
+		font-weight:normal;
+		color:#F27F1B;
+		background-color:#FFFBC2;
+		letter-spacing:1pt;
+		word-spacing:0pt;
+		font-size:15px;
+		text-align:right;
+		font-family:helvetica, sans-serif;
+		line-height:1;
+		position: absolute;
+		top: 150px;
+		right: 10px;
+		}
